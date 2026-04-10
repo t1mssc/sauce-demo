@@ -8,18 +8,19 @@ pipeline {
     }
 
     environment {
-        CI      = 'true'
+        CI = 'true'
         NODE_ENV = 'ci'
+        IMAGE_NAME = 'playwright-local'
     }
 
     stages {
-        stage('Checkout Source Code') {
+        stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/t1mssc/sauce-demo.git'
             }
         }
 
-        stage('Install Dependencies (if needed outside Docker)') {
+        stage('Install Dependencies') {
             steps {
                 script {
                     if (isUnix()) {
@@ -30,25 +31,36 @@ pipeline {
                 }
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 script {
                     if (isUnix()) {
-                        sh 'docker build -t playwright-local .'
+                        sh "docker build -t ${IMAGE_NAME} ."
                     } else {
-                        bat 'docker build -t playwright-local .'
+                        bat 'docker build -t %IMAGE_NAME% .'
                     }
                 }
             }
         }
 
-        stage('Run Playwright Tests inside Docker Container') {
+        stage('Run Playwright Tests (Docker)') {
             steps {
                 script {
                     if (isUnix()) {
-                        sh 'docker run --rm -v $WORKSPACE/playwright-report:/app/playwright-report -v $WORKSPACE/allure-results:/app/allure-results playwright-local npm run playwright:test'
+                        sh """
+                        docker run --rm \
+                        -v \$WORKSPACE/playwright-report:/app/playwright-report \
+                        -v \$WORKSPACE/allure-results:/app/allure-results \
+                        ${IMAGE_NAME} npm run playwright:test
+                        """
                     } else {
-                        bat 'docker run --rm -v "%WORKSPACE%\\playwright-report:/app/playwright-report" -v "%WORKSPACE%\\allure-results:/app/allure-results" playwright-local npm run playwright:test'
+                        bat '''
+                        docker run --rm ^
+                        -v "%WORKSPACE%\\playwright-report:/app/playwright-report" ^
+                        -v "%WORKSPACE%\\allure-results:/app/allure-results" ^
+                        %IMAGE_NAME% npm run playwright:test
+                        '''
                     }
                 }
             }
@@ -56,23 +68,58 @@ pipeline {
     }
 }
 
-    post {
-        always {
-            script {
+post {
+    always {
+        script {
+            echo '📂 Debug artifacts...'
+
+            if (isUnix()) {
+                sh 'ls -l allure-results || true'
+            } else {
+                bat 'dir allure-results || echo No allure-results'
+            }
+
+            echo '📊 Restoring Allure history...'
+
+            if (fileExists('allure-history/history')) {
                 if (isUnix()) {
-                    sh 'ls -lR allure-results || true'
-                    sh 'ls -lR allure-report || true'
+                    sh 'mkdir -p allure-results/history && cp -r allure-history/history/* allure-results/history || true'
                 } else {
-                    bat 'dir allure-results /s || echo No allure-results directory'
-                    bat 'dir allure-report /s || echo No allure-report directory'
+                    bat '''
+                    if not exist allure-results\\history mkdir allure-results\\history
+                    xcopy /E /I /Y allure-history\\history\\* allure-results\\history\\
+                    '''
                 }
             }
-            allure([
+        }
+
+        // ✅ Generate report with history
+        allure([
             includeProperties: false,
             jdk: '',
             results: [[path: 'allure-results']]
-        ]) catch (err) {
-                echo "Allure report failed: ${err}"
+        ])
+
+        script {
+            echo '💾 Saving Allure history...'
+
+            if (isUnix()) {
+                sh '''
+                mkdir -p allure-history
+                if [ -d "allure-report/history" ]; then
+                    cp -r allure-report/history allure-history/
+                fi
+                '''
+            } else {
+                bat '''
+                if not exist allure-history mkdir allure-history
+                if exist allure-report\\history (
+                    xcopy /E /I /Y allure-report\\history allure-history\\history\\
+                )
+                '''
             }
         }
+
+        archiveArtifacts artifacts: 'allure-history/**', allowEmptyArchive: true
     }
+}
