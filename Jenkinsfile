@@ -66,60 +66,60 @@ pipeline {
             }
         }
     }
-}
 
-post {
-    always {
-        script {
-            echo '📂 Debug artifacts...'
+    post {
+        always {
+            script {
+                echo '📂 Debug artifacts...'
 
-            if (isUnix()) {
-                sh 'ls -l allure-results || true'
-            } else {
-                bat 'dir allure-results || echo No allure-results'
+                if (isUnix()) {
+                    sh 'ls -l allure-results || true'
+                } else {
+                    bat 'dir allure-results || echo No allure-results'
+                }
+
+                echo '📊 Restoring Allure history...'
+
+                if (fileExists('allure-history/history')) {
+                    if (isUnix()) {
+                        sh 'mkdir -p allure-results/history && cp -r allure-history/history/* allure-results/history || true'
+                    } else {
+                        bat '''
+                        if not exist allure-results\\history mkdir allure-results\\history
+                        xcopy /E /I /Y allure-history\\history\\* allure-results\\history\\
+                        '''
+                    }
+                }
             }
 
-            echo '📊 Restoring Allure history...'
+            // ✅ Generate report with history
+            allure([
+                includeProperties: false,
+                jdk: '',
+                results: [[path: 'allure-results']]
+            ])
 
-            if (fileExists('allure-history/history')) {
+            script {
+                echo '💾 Saving Allure history...'
+
                 if (isUnix()) {
-                    sh 'mkdir -p allure-results/history && cp -r allure-history/history/* allure-results/history || true'
+                    sh '''
+                    mkdir -p allure-history
+                    if [ -d "allure-report/history" ]; then
+                        cp -r allure-report/history allure-history/
+                    fi
+                    '''
                 } else {
                     bat '''
-                    if not exist allure-results\\history mkdir allure-results\\history
-                    xcopy /E /I /Y allure-history\\history\\* allure-results\\history\\
+                    if not exist allure-history mkdir allure-history
+                    if exist allure-report\\history (
+                        xcopy /E /I /Y allure-report\\history allure-history\\history\\
+                    )
                     '''
                 }
             }
+
+            archiveArtifacts artifacts: 'allure-history/**', allowEmptyArchive: true
         }
-
-        // ✅ Generate report with history
-        allure([
-            includeProperties: false,
-            jdk: '',
-            results: [[path: 'allure-results']]
-        ])
-
-        script {
-            echo '💾 Saving Allure history...'
-
-            if (isUnix()) {
-                sh '''
-                mkdir -p allure-history
-                if [ -d "allure-report/history" ]; then
-                    cp -r allure-report/history allure-history/
-                fi
-                '''
-            } else {
-                bat '''
-                if not exist allure-history mkdir allure-history
-                if exist allure-report\\history (
-                    xcopy /E /I /Y allure-report\\history allure-history\\history\\
-                )
-                '''
-            }
-        }
-
-        archiveArtifacts artifacts: 'allure-history/**', allowEmptyArchive: true
     }
 }
