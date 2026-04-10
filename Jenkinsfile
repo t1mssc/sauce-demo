@@ -46,44 +46,37 @@ pipeline {
             steps {
                 script {
                     if (isUnix()) {
-                        sh 'docker run --rm mcr.microsoft.com/playwright:v1.59.1-jammy curl -I https://www.saucedemo.com/'
                         sh 'docker run --rm -v $WORKSPACE/playwright-report:/app/playwright-report -v $WORKSPACE/allure-results:/app/allure-results playwright-local npm run playwright:test'
                     } else {
-                        bat 'docker run --rm mcr.microsoft.com/playwright:v1.59.1-jammy curl -I https://www.saucedemo.com/'
                         bat 'docker run --rm -v "%WORKSPACE%\\playwright-report:/app/playwright-report" -v "%WORKSPACE%\\allure-results:/app/allure-results" playwright-local npm run playwright:test'
                     }
                 }
             }
         }
-
         stage('Generate Allure Report') {
             steps {
                 script {
                     if (isUnix()) {
-                        sh '''#!/bin/bash
-                            set +e
-                            if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
-                                echo "Generating Allure report..."
-                                allure generate allure-results -o allure-report --clean
-                                echo "Allure report generated successfully"
-                            else
-                                echo "No allure-results found, skipping Allure report generation"
-                            fi
-                        '''
-                    } else {
-                        bat '''if exist allure-results (
-    dir allure-results | findstr . > nul
-    if %errorlevel%==0 (
-        echo Generating Allure report...
-        allure generate allure-results -o allure-report --clean
-        echo Allure report generated successfully
-    ) else (
-        echo allure-results is empty
-    )
-) else (
-    echo No allure-results found
-)
-                        '''
+                        sh '''
+                    if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
+                        allure generate allure-results -o allure-report --clean
+                    else
+                        echo "No results, skipping"
+                    fi
+                '''
+            } else {
+                        bat '''
+                    if exist allure-results (
+                        dir allure-results | findstr . > nul
+                        if %errorlevel%==0 (
+                            allure generate allure-results -o allure-report --clean
+                        ) else (
+                            echo allure-results empty
+                        )
+                    ) else (
+                        echo No allure-results found
+                    )
+                '''
                     }
                 }
             }
@@ -102,15 +95,12 @@ pipeline {
                 }
             }
 
-            // Publish Allure Report
-            publishHTML(target: [
-                reportName: 'Allure Report',
-                reportDir: 'allure-report',
-                reportFiles: 'index.html',
-                keepAll: true,
-                alwaysLinkToLastBuild: true,
-                allowMissing: true
-            ])
+
+        allure([
+            includeProperties: false,
+            jdk: '',
+            results: [[path: 'allure-results']]
+        ])
+    }
         }
     }
-}
