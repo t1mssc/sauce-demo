@@ -50,7 +50,7 @@ pipeline {
                         sh 'docker run --rm -v $WORKSPACE/playwright-report:/app/playwright-report -v $WORKSPACE/allure-results:/app/allure-results playwright-local npm run playwright:test'
                     } else {
                         bat 'docker run --rm mcr.microsoft.com/playwright:v1.59.1-jammy curl -I https://www.saucedemo.com/'
-                        bat 'docker run --rm -v %WORKSPACE%\\playwright-report:/app/playwright-report -v %WORKSPACE%\\allure-results:/app/allure-results playwright-local npm run playwright:test'
+                        bat 'docker run --rm -v "%WORKSPACE%\\playwright-report:/app/playwright-report" -v "%WORKSPACE%\\allure-results:/app/allure-results" playwright-local npm run playwright:test'
                     }
                 }
             }
@@ -72,14 +72,17 @@ pipeline {
                         '''
                     } else {
                         bat '''if exist allure-results (
-                            if not "" == ""%1 (
-                                echo Generating Allure report...
-                                allure generate allure-results -o allure-report --clean
-                                echo Allure report generated successfully
-                            )
-                        ) else (
-                            echo No allure-results found, skipping Allure report generation
-                        )
+    dir allure-results | findstr . > nul
+    if %errorlevel%==0 (
+        echo Generating Allure report...
+        allure generate allure-results -o allure-report --clean
+        echo Allure report generated successfully
+    ) else (
+        echo allure-results is empty
+    )
+) else (
+    echo No allure-results found
+)
                         '''
                     }
                 }
