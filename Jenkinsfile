@@ -53,35 +53,8 @@ pipeline {
                 }
             }
         }
-        stage('Generate Allure Report') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh '''
-                    if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
-                        allure generate allure-results -o allure-report --clean
-                    else
-                        echo "No results, skipping"
-                    fi
-                '''
-            } else {
-                        bat '''
-                    if exist allure-results (
-                        dir allure-results | findstr . > nul
-                        if %errorlevel%==0 (
-                            allure generate allure-results -o allure-report --clean
-                        ) else (
-                            echo allure-results empty
-                        )
-                    ) else (
-                        echo No allure-results found
-                    )
-                '''
-                    }
-                }
-            }
-        }
     }
+}
 
     post {
         always {
@@ -94,13 +67,12 @@ pipeline {
                     bat 'dir allure-report /s || echo No allure-report directory'
                 }
             }
-
-
-        allure([
+            allure([
             includeProperties: false,
             jdk: '',
             results: [[path: 'allure-results']]
-        ])
-    }
+        ]) catch (err) {
+                echo "Allure report failed: ${err}"
+            }
         }
     }
