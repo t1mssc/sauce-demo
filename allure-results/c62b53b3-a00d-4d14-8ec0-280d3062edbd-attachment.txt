@@ -1,0 +1,2 @@
+2026-04-10 20:30:37 [INFO] [webkit]: Logging in with standard user credentials
+2026-04-10 20:30:37 [INFO] [webkit]: Successfully logged in and navigated to inventory page

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  playwright:
+    build: .
+    command: npx playwright test
+
+  allure-reporter:
+    image: python:3.9-slim
+    volumes:
+      - ./allure-results:/app/allure-results
+      - ./scripts:/app/scripts
+    entrypoint: ["python", "-m", "pytest", "--alluredir=/app/allure-results"]
+
+  allure-server:
+    image: jenkins-allure-plugin:latest
+    ports:
+      - "8081:80"
+

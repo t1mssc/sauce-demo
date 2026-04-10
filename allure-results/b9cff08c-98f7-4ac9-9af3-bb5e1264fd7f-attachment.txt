@@ -1,0 +1,2 @@
+2026-04-10 20:30:23 [INFO] [chromium]: Logging in with performance glitch user credentials
+2026-04-10 20:30:23 [INFO] [chromium]: Successfully logged in and navigated to inventory page

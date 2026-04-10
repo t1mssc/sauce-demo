@@ -1,0 +1,38 @@
+[
+  {
+    "username": "standard_user",
+    "password": "secret_sauce",
+    "expectedBehavior": "successful_login",
+    "description": "Standard user - should login successfully without issues"
+  },
+  {
+    "username": "locked_out_user",
+    "password": "secret_sauce",
+    "expectedBehavior": "error_message",
+    "description": "Locked out user - should show 'user is locked out' error"
+  },
+  {
+    "username": "problem_user",
+    "password": "secret_sauce",
+    "expectedBehavior": "login_with_issues",
+    "description": "Problem user - logged in but has issues with the app"
+  },
+  {
+    "username": "performance_glitch_user",
+    "password": "secret_sauce",
+    "expectedBehavior": "slow_login",
+    "description": "Performance glitch user - slow to process login"
+  },
+  {
+    "username": "error_user",
+    "password": "secret_sauce",
+    "expectedBehavior": "login_with_errors",
+    "description": "Error user - logged in but triggers errors"
+  },
+  {
+    "username": "visual_user",
+    "password": "secret_sauce",
+    "expectedBehavior": "visual_issues",
+    "description": "Visual user - UI elements may be misaligned or styled incorrectly"
+  }
+]

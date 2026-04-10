@@ -1,0 +1,2 @@
+2026-04-10 20:30:18 [INFO] [chromium]: Logging in with locked out user credentials
+2026-04-10 20:30:18 [INFO] [chromium]: Checking for error message
