@@ -13,9 +13,12 @@ export class LoginPage extends BasePage {
   constructor(page: Page) {
     super(page);
     // Using getByRole for accessible and reliable locators
-    this.usernameInput = page.getByPlaceholder('Username');
-    this.passwordInput = page.getByPlaceholder('Password');
-    this.loginButton = page.getByRole('button', { name: 'Login' });
+    this.usernameInput = page.getByPlaceholder('Username')
+      .or(this.page.locator('[data-test="username"]')); // Fallback locator
+    this.passwordInput = page.getByPlaceholder('Password')
+      .or(this.page.locator('[data-test="password"]')); // Fallback locator
+    this.loginButton = page.getByRole('button', { name: 'Login' })
+      .or(this.page.locator('[data-test="login-button"]')); // Fallback locator
   }
 
   /** @inheritDoc */
@@ -101,3 +104,4 @@ export class LoginPage extends BasePage {
     return errorLocator.textContent();
   }
 }
+

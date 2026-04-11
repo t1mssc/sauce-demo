@@ -10,7 +10,8 @@ export class CartPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.checkoutButton = page.getByRole('button', { name: 'Checkout' });
+    this.checkoutButton = this.page.getByRole('button', { name: 'Checkout' })
+      .or(this.page.locator('[data-test="checkout"]')); // Fallback locator
   }
 
   /** @inheritDoc */
@@ -30,3 +31,4 @@ export class CartPage extends BasePage {
     await this.checkoutButton.click();
   }
 }
+

@@ -12,7 +12,8 @@ export class InventoryPage extends BasePage {
   constructor(page: Page) {
     super(page);
     // Locator for "Sauce Labs Backpack" add to cart button
-    this.sauceLabsBackpackAddBtn = page.locator('.inventory_item').filter({ hasText: 'Sauce Labs Backpack' }).getByRole('button', { name: 'Add to cart' });
+    this.sauceLabsBackpackAddBtn = page.locator('.inventory_item').filter({ hasText: 'Sauce Labs Backpack' }).getByRole('button', { name: 'Add to cart' })
+      .or(page.locator('[data-test="add-to-cart-sauce-labs-backpack"]')); // Fallback locator
     // Shopping cart icon/link in header
     this.cartIcon = page.locator('#shopping_cart_container a');
   }
@@ -41,3 +42,4 @@ export class InventoryPage extends BasePage {
     await this.cartIcon.click();
   }
 }
+

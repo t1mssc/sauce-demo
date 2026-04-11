@@ -13,9 +13,12 @@ export class CheckoutPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.firstNameInput = page.getByPlaceholder('First Name');
-    this.lastNameInput = page.getByPlaceholder('Last Name');
-    this.postalCodeInput = page.getByPlaceholder('Zip/Postal Code');
+    this.firstNameInput = page.getByPlaceholder('First Name')
+      .or(this.page.locator('[data-test="first-name"]')); // Fallback locator
+    this.lastNameInput = page.getByPlaceholder('Last Name')
+      .or(this.page.locator('[data-test="last-name"]')); // Fallback locator
+    this.postalCodeInput = page.getByPlaceholder('Zip/Postal Code')
+      .or(this.page.locator('[data-test="postal-code"]')); // Fallback locator
     this.continueButton = page.getByRole('button', { name: 'Continue' });
   }
 

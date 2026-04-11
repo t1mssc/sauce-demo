@@ -11,7 +11,8 @@ export class CheckoutOverviewPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.finishButton = page.getByRole('button', { name: 'Finish' });
+    this.finishButton = page.getByRole('button', { name: 'Finish' })
+      .or(this.page.locator('[data-test="continue"]')); // Fallback locator
     this.orderCompleteHeader = page.getByRole('heading', { name: 'Thank you for your order!' });
   }
 
@@ -39,3 +40,4 @@ export class CheckoutOverviewPage extends BasePage {
     await this.orderCompleteHeader.waitFor({ state: 'visible' });
   }
 }
+

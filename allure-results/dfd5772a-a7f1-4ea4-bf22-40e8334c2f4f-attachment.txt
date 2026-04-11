@@ -1,2 +1,0 @@
-2026-04-10 20:30:25 [INFO] [firefox]: Logging in with standard user credentials
-2026-04-10 20:30:25 [INFO] [firefox]: Successfully logged in and navigated to inventory page
