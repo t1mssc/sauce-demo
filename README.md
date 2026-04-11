@@ -43,7 +43,6 @@ After building the Docker image, you can run the tests inside a container:
 - **docker-compose.yaml**: Docker Compose configuration file.
 - **install_dependencies.bat** and **install_dependencies.sh**: Scripts to install project dependencies.
 - **pages/**: Contains TypeScript files defining Page Objects for different pages of the application (`LoginPage.ts`, `CartPage.ts`, etc.).
-- **scripts/**: Placeholder for additional scripts.
 - **tests/e2e/**: End-to-end test files.
 - **utils/**: Utility functions like logger creation and user data factory.
 
